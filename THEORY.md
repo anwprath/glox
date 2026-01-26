@@ -115,3 +115,134 @@ The most sophisticated JITs insert profiling hooks into the generated code to se
 - When we say a language implementation “is a compiler”, we mean it translates source code to some other form but doesn’t execute it. The user has to take the resulting output and run it themselves.
 
 - Conversely, when we say an implementation “is an interpreter”, we mean it takes in source code and executes it immediately. It runs programs “from source”.
+
+
+### 3.0 The Lox Language
+###### http://localhost:8000/the-lox-language.html
+
+#### 3.1 Hello, Lox
+
+Here’s your very first taste of Lox:
+
+```C
+// Your first Lox program!
+print "Hello, world!";
+```
+
+#### 3.2.1 Dynamic typing
+
+Lox is dynamically typed. Variables can store values of any type, and a single variable can even store values of different types at different times. If you try to perform an operation on values of the wrong type—say, dividing a number by a string—then the error is detected and reported at runtime.
+
+
+#### 3.2.2 Automatic memory management
+
+High-level languages exist to eliminate error-prone, low-level drudgery, and what could be more tedious than manually managing the allocation and freeing of storage? 
+
+There are two main techniques for managing memory: reference counting and tracing garbage collection (usually just called garbage collection or GC). Ref counters are much simpler to implement—I think that’s why Perl, PHP, and Python all started out using them. But, over time, the limitations of ref counting become too troublesome. All of those languages eventually ended up adding a full tracing GC, or at least enough of one to clean up object cycles.
+
+### 3.3 Data Types
+
+1. Booleans: Lox has a dedicated Boolean type. 
+
+    ```C
+    true;  // Not false.
+    false; // Not *not* false.
+    ```
+
+2. Numbers: Lox has only one kind of number: double-precision floating point. Since floating-point numbers can also represent a wide range of integers, that covers a lot of territory, while keeping things simple.
+
+    ```C
+    1234;  // An integer.
+    12.34; // A decimal number.C
+    ```
+
+3. Strings: Like most languages, they are enclosed in double quotes.
+    ```C
+    "I am a string";
+    "";    // The empty string.
+    "123"; // This is a string, not a number.
+    ```
+
+4. Nil: It represents “no value”. 
+
+
+### 3.4 Expressions
+
+#### 3.4.1 Arithmetic
+
+```C
+add + me;
+subtract - me;
+multiply * me;
+divide / me;
+```
+
+The subexpressions on either side of the operator are operands. Because there are two of them, these are called binary operators. 
+
+Because the operator is fixed in the middle of the operands, these are also called infix operators (as opposed to prefix operators where the operator comes before the operands, and postfix where it comes after).
+
+One arithmetic operator is actually both an infix and a prefix one. The - operator can also be used to negate a number.
+
+```C
+-negateMe;
+```
+
+#### 3.4.2 Comparison and Equality
+
+
+less < than;
+lessThan <= orEqual;
+greater > than;
+greaterThan >= orEqual;
+
+We can test two values of any kind for equality or inequality.
+
+```C
+1 == 2;         // false.
+"cat" != "dog"; // true.
+```
+
+Even different types.
+
+```C
+314 == "pi"; // false.
+```
+
+Values of different types are never equivalent.
+
+```C
+123 == "123"; // false.
+```
+
+#### 3.4.3 Logical operators
+
+The not operator, a prefix !, returns false if its operand is true, and vice versa.
+
+```C
+!true;  // false.
+!false; // true.
+```
+The other two logical operators really are control flow constructs in the guise of expressions. An and expression determines if two values are both true. It returns the left operand if it’s false, or the right operand otherwise.
+
+```C
+true and false; // false.
+true and true;  // true.
+```
+
+And an or expression determines if either of two values (or both) are true. It returns the left operand if it is true and the right operand otherwise.
+
+```C
+false or false; // false.
+true or false;  // true.
+```
+
+The reason and and or are like control flow structures is that they short-circuit. Not only does and return the left operand if it is false, it doesn’t even evaluate the right one in that case. Conversely, if the left operand of an or is true, the right is skipped.
+
+
+#### 3.4.4 Precedence and grouping
+
+All of these operators have the same precedence and associativity that you’d expect coming from C. In cases where the precedence isn’t what you want, you can use () to group stuff.
+
+```js
+var average = (min + max) / 2;
+```
