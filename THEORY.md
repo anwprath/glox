@@ -246,3 +246,224 @@ All of these operators have the same precedence and associativity that you’d e
 ```js
 var average = (min + max) / 2;
 ```
+
+#### 3.5 Statements
+
+Where an expression’s main job is to produce a value, a statement’s job is to produce an effect. Since, by definition, statements don’t evaluate to a value, to be useful they have to otherwise change the world in some way—usually modifying some state, reading input, or producing output.
+
+#### 3.6 Variables
+
+You declare variables using `var` statements. If you omit the initializer, the variable’s value defaults to nil.
+
+```C
+var imAVariable = "here is my value";
+var iAmNil;
+```
+
+Once declared, you can, naturally, access and assign a variable using its name.
+
+```C
+var breakfast = "bagels";
+print breakfast; // "bagels".
+breakfast = "beignets";
+print breakfast; // "beignets".
+```
+
+#### 3.7 Control Flow
+
+An if statement executes one of two statements based on some condition.
+
+```C
+if (condition) {
+  print "yes";
+} else {
+  print "no";
+}
+```
+
+Finally, we have for loops.
+
+```C
+for (var a = 1; a < 10; a = a + 1) {
+  print a;
+}
+```
+
+### 3.8 Functions
+
+In Lox, you do that with `fun`.
+```C
+fun printSum(a, b) {
+  print a + b;
+}
+```
+
+From here on out:
+
+ - An argument is an actual value you pass to a function when you call it. So a function call has an argument list. Sometimes you hear actual parameter used for these.
+
+ - A parameter is a variable that holds the value of the argument inside the body of the function. Thus, a function declaration has a parameter list. Others call these formal parameters or simply formals.
+
+
+### 3.9 Closures
+
+
+Functions are first class in Lox, which just means they are real values that you can get a reference to, store in variables, pass around, etc. This works:
+
+```C
+fun addPair(a, b) {
+  return a + b;
+}
+
+fun identity(a) {
+  return a;
+}
+
+print identity(addPair)(1, 2); // Prints "3".
+```
+Since function declarations are statements, you can declare local functions inside another function.
+
+```C
+fun outerFunction() {
+  fun localFunction() {
+    print "I'm local!";
+  }
+
+  localFunction();
+}
+```
+
+If you combine local functions, first-class functions, and block scope, you run into this interesting situation:
+```C
+fun returnFunction() {
+  var outside = "outside";
+
+  fun inner() {
+    print outside;
+  }
+
+  return inner;
+}
+
+var fn = returnFunction();
+fn();
+```
+Here, inner() accesses a local variable declared outside of its body in the surrounding function. Is this kosher? Now that lots of languages have borrowed this feature from Lisp, you probably know the answer is yes.
+
+For that to work, inner() has to “hold on” to references to any surrounding variables that it uses so that they stay around even after the outer function has returned. We call functions that do this closures. These days, the term is often used for any first-class function, though it’s sort of a misnomer if the function doesn’t happen to close over any variables.
+
+
+### 3.9 Classes
+
+For a dynamically typed language, objects are pretty handy. We need some way of defining compound data types to bundle blobs of stuff together.
+
+#### 3.9.3 Classes or Prototypes
+
+In class-based languages, there are two core concepts: instances and classes. Instances store the state for each object and have a reference to the instance’s class. Classes contain the methods and inheritance chain. To call a method on an instance, there is always a level of indirection. You look up the instance’s class and then you find the method _there_
+
+Prototype-based languages merge these two concepts. There are only objects—no classes—and each individual object may contain state and methods. Objects can directly inherit from each other (or “delegate to” in prototypal lingo):
+
+#### 3.9.4 Classes in Lox
+
+You declare a class and its methods like so:
+
+```C
+class Breakfast {
+  cook() {
+    print "Eggs a-fryin'!";
+  }
+
+  serve(who) {
+    print "Enjoy your breakfast, " + who + ".";
+  }
+}
+```
+
+The body of a class contains its methods. They look like function declarations but without the fun keyword. When the class declaration is executed, Lox creates a class object and stores that in a variable named after the class. Just like functions, classes are first class in Lox.
+
+
+```C
+// Store it in variables.
+var someVariable = Breakfast;
+
+// Pass it to functions.
+someFunction(Breakfast);
+```
+Call a class like a function, and it produces a new instance of itself.
+```C
+var breakfast = Breakfast();
+print breakfast; // "Breakfast instance".
+```
+
+#### 3.9.5 Instantiation and Initialization
+
+The idea behind object-oriented programming is encapsulating behavior and state together. To do that, you need fields. Lox, like other dynamically typed languages, lets you freely add properties onto objects.
+```C
+breakfast.meat = "sausage";
+breakfast.bread = "sourdough";
+```
+
+Assigning to a field creates it if it doesn’t already exist.
+
+If you want to access a field or method on the current object from within a method, you use good old this.
+
+```C
+class Breakfast {
+  serve(who) {
+    print "Enjoy your " + this.meat + " and " +
+        this.bread + ", " + who + ".";
+  }
+
+  // ...
+}
+```
+Part of encapsulating data within an object is ensuring the object is in a valid state when it’s created. To do that, you can define an initializer. If your class has a method named init(), it is called automatically when the object is constructed. Any parameters passed to the class are forwarded to its initializer.
+
+```C
+class Breakfast {
+  init(meat, bread) {
+    this.meat = meat;
+    this.bread = bread;
+  }
+
+  // ...
+}
+
+var baconAndToast = Breakfast("bacon", "toast");
+baconAndToast.serve("Dear Reader");
+// "Enjoy your bacon and toast, Dear Reader."
+
+```
+
+
+#### 3.9.6 Inheritance
+
+Every object-oriented language lets you not only define methods, but reuse them across multiple classes or objects. For that, Lox supports single inheritance. When you declare a class, you can specify a class that it inherits from using a less-than (<) operator.
+
+```C
+class Brunch < Breakfast {
+  drink() {
+    print "How about a Bloody Mary?";
+  }
+}
+```
+
+Why the < operator? I didn’t feel like introducing a new keyword like extends. Lox doesn’t use : for anything else so I didn’t want to reserve that either. Instead, I took a page from Ruby and used <.
+
+Here, Brunch is the derived class or subclass, and Breakfast is the base class or superclass.
+
+Even the init() method gets inherited. In practice, the subclass usually wants to define its own init() method too. But the original one also needs to be called so that the superclass can maintain its state. We need some way to call a method on our own instance without hitting our own methods.
+
+```C
+class Brunch < Breakfast {
+  init(meat, bread, drink) {
+    super.init(meat, bread);
+    this.drink = drink;
+  }
+}
+```
+
+### 3.10 The Standard Library
+
+- `print` statement
+- clock() - epoch
