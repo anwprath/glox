@@ -6,8 +6,11 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 )
+
+var hadError bool = false
 
 func main() {
 	args := os.Args
@@ -23,6 +26,7 @@ func main() {
 
 func run(command string) {
 	fmt.Println(command)
+
 }
 
 func runFile(args []string) {
@@ -33,6 +37,9 @@ func runFile(args []string) {
 	}
 
 	run(string(bytes))
+	if hadError {
+		os.Exit(69)
+	}
 }
 
 func runPrompt() {
@@ -48,5 +55,14 @@ func runPrompt() {
 			break
 		}
 		run(scanner.Text())
+		hadError = false
 	}
+}
+
+func Error(line int, message string) {
+	report(line, "", message)
+}
+func report(line int, where, message string) {
+	slog.Error("[line " + strconv.Itoa(line) + "] Error" + where + ": " + message)
+	hadError = true
 }
