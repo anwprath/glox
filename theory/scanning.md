@@ -196,3 +196,109 @@ Little helper function that tells us if we’ve consumed all the characters:
     return current >= source.length();
   }
 ```
+
+
+### 4.5 Recognizing Lexemes
+
+In each turn of the loop, we scan a single token. We’ll start simple. Imagine if every lexeme were only a single character long. All you would need to do is consume the next character and pick a token type for it. Several lexemes are only a single character in Lox, so let’s start with those.
+```java
+// lox/Scanner.java
+// add after scanTokens()
+
+  private void scanToken() {
+    char c = advance();
+    switch (c) {
+      case '(': addToken(LEFT_PAREN); break;
+      case ')': addToken(RIGHT_PAREN); break;
+      case '{': addToken(LEFT_BRACE); break;
+      case '}': addToken(RIGHT_BRACE); break;
+      case ',': addToken(COMMA); break;
+      case '.': addToken(DOT); break;
+      case '-': addToken(MINUS); break;
+      case '+': addToken(PLUS); break;
+      case ';': addToken(SEMICOLON); break;
+      case '*': addToken(STAR); break; 
+    }
+  }
+```
+
+Again, we need a couple of helper methods.
+```java
+// lox/Scanner.java
+  private char advance() {
+    return source.charAt(current++);
+  }
+
+  private void addToken(TokenType type) {
+    addToken(type, null);
+  }
+
+  private void addToken(TokenType type, Object literal) {
+    String text = source.substring(start, current);
+    tokens.add(new Token(type, text, literal, line));
+  }
+```
+
+The advance() method consumes the next character in the source file and returns it. Where advance() is for input, addToken() is for output. It grabs the text of the current lexeme and creates a new token for it. We’ll use the other overload to handle tokens with literal values soon.
+
+
+#### 4.5.1 Lexical errors
+
+Right now, erroneous characters get silently discarded. They aren’t used by the Lox language, but that doesn’t mean the interpreter can pretend they aren’t there. Instead, we report an error.
+
+
+```java
+// lox/Scanner.java
+// in scanToken()
+      default:
+        Lox.error(line, "Unexpected character.");
+        break;
+
+    }
+```
+
+Note that the erroneous character is still consumed by the earlier call to advance(). That’s important so that we don’t get stuck in an infinite loop.
+
+Note also that we keep scanning. There may be other errors later in the program. It gives our users a better experience if we detect as many of those as possible in one go.
+
+
+#### 4.5.2 Operators
+
+We have single-character lexemes working, but that doesn’t cover all of Lox’s operators. What about !? It’s a single character, right? Sometimes, yes, but if the very next character is an equals sign, then we should instead create a != lexeme. Note that the ! and = are not two independent operators. You can’t write ! = in Lox and have it behave like an inequality operator. That’s why we need to scan != as a single lexeme. Likewise, <, >, and = can all be followed by = to create the other equality and comparison operators.
+
+For all of these, we need to look at the second character.
+```java
+      case '*': addToken(STAR); break; 
+
+// lox/Scanner.java
+// in scanToken()
+
+      case '!':
+        addToken(match('=') ? BANG_EQUAL : BANG);
+        break;
+      case '=':
+        addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+        break;
+      case '<':
+        addToken(match('=') ? LESS_EQUAL : LESS);
+        break;
+      case '>':
+        addToken(match('=') ? GREATER_EQUAL : GREATER);
+        break;
+
+
+      default:
+```
+Those cases use this new method:
+```java
+// lox/Scanner.java
+// add after scanToken()
+
+  private boolean match(char expected) {
+    if (isAtEnd()) return false;
+    if (source.charAt(current) != expected) return false;
+
+    current++;
+    return true;
+  }
+```

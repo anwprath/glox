@@ -6,11 +6,10 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"strconv"
 	"strings"
-)
 
-var hadError bool = false
+	errors "github.com/anwprath/glox/errors"
+)
 
 func main() {
 	args := os.Args
@@ -37,7 +36,7 @@ func runFile(args []string) {
 	}
 
 	run(string(bytes))
-	if hadError {
+	if errors.HadError {
 		os.Exit(69)
 	}
 }
@@ -55,14 +54,6 @@ func runPrompt() {
 			break
 		}
 		run(scanner.Text())
-		hadError = false
+		errors.HadError = false
 	}
-}
-
-func Error(line int, message string) {
-	report(line, "", message)
-}
-func report(line int, where, message string) {
-	slog.Error("[line " + strconv.Itoa(line) + "] Error" + where + ": " + message)
-	hadError = true
 }
