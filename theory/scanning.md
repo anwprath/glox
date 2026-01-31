@@ -302,3 +302,36 @@ Those cases use this new method:
     return true;
   }
 ```
+
+### 4.6 Longer Lexemes
+
+We’re still missing one operator: / for division. That character needs a little special handling because comments begin with a slash too.
+
+```java
+// lox/Scanner.java
+// in scanToken()
+
+      case '/':
+        if (match('/')) {
+          // A comment goes until the end of the line.
+          while (peek() != '\n' && !isAtEnd()) advance();
+        } else {
+          addToken(SLASH);
+        }
+        break;
+
+```
+This is similar to the other two-character operators, except that when we find a second /, we don’t end the token yet. Instead, we keep consuming characters until we reach the end of the line.
+
+This is our general strategy for handling longer lexemes. After we detect the beginning of one, we shunt over to some lexeme-specific code that keeps eating characters until it sees the end.
+
+We’ve got another helper:
+```java
+// lox/Scanner.java
+// add after match()
+
+  private char peek() {
+    if (isAtEnd()) return '\0';
+    return source.charAt(current);
+  }
+```
