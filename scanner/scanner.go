@@ -94,6 +94,8 @@ func (s *Scanner) scanToken() {
 		break
 	case '\n':
 		s.line++
+	case '"':
+		s.scanString()
 	default:
 		errors.Error(s.line, "Unexpected character.")
 	}
@@ -136,4 +138,24 @@ func (s *Scanner) peek() rune {
 		return '\000'
 	}
 	return s.source[s.current]
+}
+
+func (s *Scanner) scanString() {
+	for s.peek() != '"' && !s.isAtEnd() {
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+
+	if s.isAtEnd() {
+		errors.Error(s.line, "Unterminated string")
+		return
+	}
+
+	// The closing ".
+	s.advance()
+
+	var value string = string(s.source[s.start+1 : s.current-1])
+	s.appendToken(token.STRING, value)
 }

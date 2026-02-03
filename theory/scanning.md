@@ -335,3 +335,33 @@ We’ve got another helper:
     return source.charAt(current);
   }
 ```
+
+#### 4.6.1 String literals
+
+We’ll do strings first, since they always begin with a specific character, `"`.
+
+`      case '"': string(); break;`
+
+That calls:
+```java
+// lox/Scanner.java
+
+  private void string() {
+    while (peek() != '"' && !isAtEnd()) {
+      if (peek() == '\n') line++;
+      advance();
+    }
+
+    if (isAtEnd()) {
+      Lox.error(line, "Unterminated string.");
+      return;
+    }
+
+    // The closing ".
+    advance();
+
+    // Trim the surrounding quotes.
+    String value = source.substring(start + 1, current - 1);
+    addToken(STRING, value);
+  }
+```
