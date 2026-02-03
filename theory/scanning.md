@@ -365,3 +365,65 @@ That calls:
     addToken(STRING, value);
   }
 ```
+
+#### 4.6.2 Number literals
+
+We don’t allow a leading or trailing decimal point, so these are both invalid:
+
+```
+.1234
+1234.
+```
+We could easily support the former, but I left it out to keep things simple. The latter gets weird if we ever want to allow methods on numbers like 123.sqrt().
+
+
+To recognize the beginning of a number lexeme, we look for any digit. It’s kind of tedious to add cases for every decimal digit, so we’ll stuff it in the default case instead.
+
+      default:
+
+```java
+// lox/Scanner.java
+// in scanToken()
+// replace 1 line
+
+        if (isDigit(c)) {
+          number();
+        } else {
+          Lox.error(line, "Unexpected character.");
+        }
+
+        break;
+```
+
+This relies on this little utility:
+```java
+// lox/Scanner.java
+// add after peek()
+
+  private boolean isDigit(char c) {
+    return c >= '0' && c <= '9';
+  } 
+```
+
+Once we know we are in a number, we branch to a separate method to consume the rest of the literal, like we do with strings.
+
+```java
+// lox/Scanner.java
+// add after scanToken()
+
+  private void number() {
+    while (isDigit(peek())) advance();
+
+    // Look for a fractional part.
+    if (peek() == '.' && isDigit(peekNext())) {
+      // Consume the "."
+      advance();
+
+      while (isDigit(peek())) advance();
+    }
+
+    addToken(NUMBER,
+        Double.parseDouble(source.substring(start, current)));
+  }
+
+```

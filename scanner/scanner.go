@@ -1,6 +1,8 @@
 package scanner
 
 import (
+	"strconv"
+
 	"github.com/anwprath/glox/errors"
 	"github.com/anwprath/glox/token"
 )
@@ -97,7 +99,11 @@ func (s *Scanner) scanToken() {
 	case '"':
 		s.scanString()
 	default:
-		errors.Error(s.line, "Unexpected character.")
+		if isDigit(c) {
+			s.scanNumber()
+		} else {
+			errors.Error(s.line, "Unexpected character.")
+		}
 	}
 
 }
@@ -140,6 +146,13 @@ func (s *Scanner) peek() rune {
 	return s.source[s.current]
 }
 
+func (s *Scanner) peekNext() rune {
+	if s.current+1 >= len(s.source) {
+		return '\000'
+	}
+	return s.source[s.current+1]
+}
+
 func (s *Scanner) scanString() {
 	for s.peek() != '"' && !s.isAtEnd() {
 		if s.peek() == '\n' {
@@ -158,4 +171,31 @@ func (s *Scanner) scanString() {
 
 	var value string = string(s.source[s.start+1 : s.current-1])
 	s.appendToken(token.STRING, value)
+}
+
+func (s *Scanner) scanNumber() {
+	for isDigit(s.peek()) {
+		s.advance()
+	}
+
+	if s.peek() == '.' && isDigit(s.peekNext()) {
+		s.advance()
+		for isDigit(s.peek()) {
+			s.advance()
+		}
+	}
+
+	// The closing ".
+	s.advance()
+
+	var valueStr string = string(s.source[s.start:s.current])
+	valueNum, err := strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		panic(err)
+	}
+	s.appendToken(token.NUMBER, valueNum)
+}
+
+func isDigit(c rune) bool {
+	return c >= '0' && c <= '9'
 }
