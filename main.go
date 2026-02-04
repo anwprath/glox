@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	errors "github.com/anwprath/glox/errors"
+	"github.com/anwprath/glox/scanner"
 )
 
 func main() {
@@ -24,17 +25,18 @@ func main() {
 }
 
 func run(command string) {
-	fmt.Println(command)
-
+	sc := 	scanner.New(command)
+	tokens := sc.ScanTokens()
+	fmt.Println(tokens)
 }
 
 func runFile(args []string) {
-	bytes, err := os.ReadFile(args[0])
+	bytes, err := os.ReadFile(args[1])
 	if err != nil {
-		slog.Error("error reading file", "file", args[0], "error", err)
+		slog.Error("error reading file", "file", args[1], "error", err)
 		log.Fatal()
 	}
-
+	fmt.Println("Reading file: ", args[1])
 	run(string(bytes))
 	if errors.HadError {
 		os.Exit(69)
@@ -42,18 +44,18 @@ func runFile(args []string) {
 }
 
 func runPrompt() {
-	scanner := bufio.NewScanner(os.Stdin)
+	inputScanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("> ")
 		// Ctrl+D works here
-		if !scanner.Scan() {
+		if !inputScanner.Scan() {
 			break
 		}
-		text := strings.TrimSpace(scanner.Text())
+		text := strings.TrimSpace(inputScanner.Text())
 		if text == "" {
 			break
 		}
-		run(scanner.Text())
+		run(inputScanner.Text())
 		errors.HadError = false
 	}
 }

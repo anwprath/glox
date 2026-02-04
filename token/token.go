@@ -19,7 +19,7 @@ func New(tokenType TokenType, lexeme string, literal any, line int) Token {
 }
 
 func (t Token) String() string {
-	return t.tokenType.String() + " " + t.lexeme + " " + fmt.Sprintf("%v", t.literal)
+	return "Token(" + t.tokenType.String() + " " + t.lexeme + " " + fmt.Sprintf("%v", t.literal) + ")"
 }
 
 var keywords map[string]TokenType = map[string]TokenType{

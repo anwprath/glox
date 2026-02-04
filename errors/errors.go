@@ -1,7 +1,7 @@
 package errors
 
 import (
-	"log/slog"
+	"fmt"
 	"strconv"
 )
 
@@ -12,6 +12,6 @@ func Error(line int, message string) {
 }
 
 func report(line int, where, message string) {
-	slog.Error("[line " + strconv.Itoa(line) + "] Error" + where + ": " + message)
+	fmt.Println("[line " + strconv.Itoa(line) + "] Error" + where + ": " + message)
 	HadError = true
 }

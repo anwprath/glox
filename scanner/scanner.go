@@ -187,9 +187,6 @@ func (s *Scanner) scanNumber() {
 		}
 	}
 
-	// The closing ".
-	s.advance()
-
 	var valueStr string = string(s.source[s.start:s.current])
 	valueNum, err := strconv.ParseFloat(valueStr, 64)
 	if err != nil {
