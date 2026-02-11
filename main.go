@@ -25,7 +25,7 @@ func main() {
 }
 
 func run(command string) {
-	sc := 	scanner.New(command)
+	sc := scanner.New(command)
 	tokens := sc.ScanTokens()
 	fmt.Println(tokens)
 }

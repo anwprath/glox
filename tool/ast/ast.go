@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
 func main() {
+	defer func() { exec.Command("gofmt", "-w", "ast/expr.go").Run() }()
 	args := os.Args
 	if len(args) != 2 {
 		fmt.Println("Usage: generate_ast <output directory>")
@@ -66,6 +68,6 @@ func defineType(w *bufio.Writer, className, fieldList string) {
 		memberType := strings.Split(member, " ")[0]
 		fmt.Fprintf(w, " %s %s\n", memberName, memberType)
 	}
-	fmt.Fprintf(w, "}\n")
+	fmt.Fprintf(w, "}\n\n")
 
 }
