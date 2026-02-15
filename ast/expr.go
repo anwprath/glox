@@ -7,9 +7,9 @@ type Expr interface {
 }
 
 type Binary struct {
-	left     Expr
-	operator token.Token
-	right    Expr
+	Left     Expr
+	Operator token.Token
+	Right    Expr
 }
 
 func (node *Binary) Accept(v Visitor) any {
@@ -17,7 +17,7 @@ func (node *Binary) Accept(v Visitor) any {
 }
 
 type Grouping struct {
-	expression Expr
+	Expression Expr
 }
 
 func (node *Grouping) Accept(v Visitor) any {
@@ -25,7 +25,7 @@ func (node *Grouping) Accept(v Visitor) any {
 }
 
 type Literal struct {
-	value any
+	Value any
 }
 
 func (node *Literal) Accept(v Visitor) any {
@@ -33,8 +33,8 @@ func (node *Literal) Accept(v Visitor) any {
 }
 
 type Unary struct {
-	operator token.Token
-	right    Expr
+	Operator token.Token
+	Right    Expr
 }
 
 func (node *Unary) Accept(v Visitor) any {

@@ -21,10 +21,10 @@ func main() {
 	outputDir := args[1]
 
 	defineAst(outputDir, "expr", []string{
-		"Binary   : Expr left, token.Token operator, Expr right",
-		"Grouping : Expr expression",
-		"Literal  : any value",
-		"Unary    : token.Token operator, Expr right",
+		"Binary   : Expr Left, token.Token Operator, Expr Right",
+		"Grouping : Expr Expression",
+		"Literal  : any Value",
+		"Unary    : token.Token Operator, Expr Right",
 	})
 }
 
