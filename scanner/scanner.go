@@ -29,7 +29,7 @@ func (s *Scanner) ScanTokens() []token.Token {
 		s.scanToken()
 	}
 
-	s.tokens = append(s.tokens, token.New(token.EOF, "", nil, 999))
+	s.tokens = append(s.tokens, token.New(token.EOF, "", nil, s.line))
 	return s.tokens
 }
 
