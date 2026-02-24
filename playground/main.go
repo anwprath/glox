@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/anwprath/glox/ast/astPrinter"
 	"github.com/anwprath/glox/parser"
 	"github.com/anwprath/glox/scanner"
 )
@@ -32,7 +33,8 @@ func run(command string) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf( "%s\n", exp)
+		printer := &astPrinter.AstPrinter{}
+		fmt.Println(printer.Print(exp))
 	}
 
 }

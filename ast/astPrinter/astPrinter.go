@@ -12,7 +12,7 @@ var _ ast.Visitor = &AstPrinter{}
 
 type AstPrinter struct{}
 
-func (p *AstPrinter) Print(expr *ast.Binary) any {
+func (p *AstPrinter) Print(expr ast.Expr) any {
 	return expr.Accept(p)
 }
 
