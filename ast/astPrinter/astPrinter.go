@@ -12,28 +12,28 @@ var _ ast.Visitor = &AstPrinter{}
 
 type AstPrinter struct{}
 
-func (p *AstPrinter) Print(expr ast.Expr) any {
+func (p *AstPrinter) Print(expr ast.Expr) (any, error) {
 	return expr.Accept(p)
 }
 
-func (p *AstPrinter) VisitBinaryExpr(expr *ast.Binary) any {
+func (p *AstPrinter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 	return p.parenthesize(expr.Operator.Lexeme,
-		expr.Left, expr.Right)
+		expr.Left, expr.Right), nil
 }
 
-func (p *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) any {
-	return p.parenthesize("group", expr.Expression)
+func (p *AstPrinter) VisitGroupingExpr(expr *ast.Grouping) (any, error) {
+	return p.parenthesize("group", expr.Expression), nil
 }
 
-func (p *AstPrinter) VisitLiteralExpr(expr *ast.Literal) any {
+func (p *AstPrinter) VisitLiteralExpr(expr *ast.Literal) (any, error) {
 	if expr.Value == nil {
-		return "nil"
+		return "nil", nil
 	}
-	return expr.Value
+	return expr.Value, nil
 }
 
-func (p *AstPrinter) VisitUnaryExpr(expr *ast.Unary) any {
-	return p.parenthesize(expr.Operator.Lexeme, expr.Right)
+func (p *AstPrinter) VisitUnaryExpr(expr *ast.Unary) (any, error) {
+	return p.parenthesize(expr.Operator.Lexeme, expr.Right), nil
 }
 
 func (p *AstPrinter) parenthesize(name string, exprs ...ast.Expr) string {
