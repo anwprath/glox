@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/anwprath/glox/ast"
 	"github.com/anwprath/glox/token"
@@ -12,7 +13,42 @@ var _ ast.Visitor = &Interpreter{}
 type Interpreter struct{}
 
 func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) any {
-	panic("unimplemented")
+	left := i.evaluate(expr.Left)
+	right := i.evaluate(expr.Right)
+
+	switch expr.Operator.TokenType {
+	case token.EQUAL_EQUAL:
+		return isEqual(left, right)
+	case token.BANG_EQUAL:
+		return !isEqual(left, right)
+	case token.LESS:
+		return left.(float64) < right.(float64)
+	case token.LESS_EQUAL:
+		return left.(float64) <= right.(float64)
+	case token.GREATER:
+		return left.(float64) > right.(float64)
+	case token.GREATER_EQUAL:
+		return left.(float64) >= right.(float64)
+	case token.MINUS:
+		return left.(float64) - right.(float64)
+	case token.STAR:
+		return left.(float64) * right.(float64)
+	case token.SLASH:
+		return left.(float64) / right.(float64)
+	case token.PLUS:
+		if l, okL := left.(float64); okL {
+			if r, okR := right.(float64); okR {
+				return l + r
+			}
+		}
+		if l, okL := left.(string); okL {
+			if r, okR := right.(string); okR {
+				return l + r
+			}
+		}
+	}
+
+	panic("unreachable code in VisitBinaryExpr")
 }
 
 func (i *Interpreter) VisitGroupingExpr(expr *ast.Grouping) any {
@@ -54,4 +90,9 @@ func isTruthy(value any) bool {
 		return !val
 	}
 	return true
+}
+
+func isEqual(a, b any) bool {
+	// a == b panics if a and b are non-comparables
+	return reflect.DeepEqual(a, b)
 }
