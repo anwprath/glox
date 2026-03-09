@@ -3,6 +3,8 @@ package interpreter
 import (
 	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/anwprath/glox/ast"
 	"github.com/anwprath/glox/errors"
@@ -12,6 +14,18 @@ import (
 var _ ast.Visitor = &Interpreter{}
 
 type Interpreter struct{}
+
+func (i *Interpreter) Interpret(expr ast.Expr) {
+	value, err := i.evaluate(expr)
+	if err != nil {
+		if runtimeErr, ok := err.(errors.RuntimeError); ok {
+			errors.ReportRuntimeError(runtimeErr)
+		} else {
+			panic(err)
+		}
+	}
+	fmt.Println(stringify(value))
+}
 
 func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 	left, err := i.evaluate(expr.Left)
@@ -148,4 +162,18 @@ func checkBinaryNumberOperand(operator token.Token, leftOperand, rightOperand an
 		}
 	}
 	return nil
+}
+
+func stringify(value any) string {
+	if value == nil {
+		return "nil"
+	}
+	if v, ok := value.(float64); ok {
+		str := strconv.FormatFloat(v, 'f', -1, 64)
+		if strings.HasSuffix(str, ".0") {
+			str = strings.ReplaceAll(str, ".0", "")
+		}
+		return str
+	}
+	return fmt.Sprint(value)
 }

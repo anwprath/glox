@@ -8,6 +8,7 @@ import (
 )
 
 var HadError bool = false
+var HadRuntimeError bool = false
 
 func Error(line int, message string) {
 	report(line, "", message)

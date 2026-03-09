@@ -9,9 +9,12 @@ import (
 	"strings"
 
 	"github.com/anwprath/glox/ast/astPrinter"
+	"github.com/anwprath/glox/interpreter"
 	"github.com/anwprath/glox/parser"
 	"github.com/anwprath/glox/scanner"
 )
+
+var Interpreter = interpreter.Interpreter{}
 
 func main() {
 	args := os.Args
@@ -32,11 +35,12 @@ func run(command string) {
 	exp, err := tokenParser.Parse()
 	if err != nil {
 		fmt.Println(err)
+		return
 	} else {
 		printer := &astPrinter.AstPrinter{}
 		fmt.Println(printer.Print(exp))
+		Interpreter.Interpret(exp)
 	}
-
 }
 
 func runFile(args []string) {

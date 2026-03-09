@@ -41,6 +41,9 @@ func runFile(args []string) {
 	if errors.HadError {
 		os.Exit(69)
 	}
+	if errors.HadRuntimeError {
+		os.Exit(70)
+	}
 }
 
 func runPrompt() {
