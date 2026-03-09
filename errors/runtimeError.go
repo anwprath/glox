@@ -7,8 +7,8 @@ import (
 )
 
 type RuntimeError struct {
-	Token token.Token
-	Message    string
+	Token   token.Token
+	Message string
 }
 
 func (e RuntimeError) Error() string {

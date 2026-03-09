@@ -18,18 +18,18 @@ func report(line int, where, message string) {
 	HadError = true
 }
 
-func ReportParseError(t token.Token,  message string) error {
-    if (t.TokenType == token.EOF) {
-      report(t.Line, " at end", message);
-    } else {
-      report(t.Line, " at '" + t.Lexeme + "'", message);
-    }
+func ReportParseError(t token.Token, message string) error {
+	if t.TokenType == token.EOF {
+		report(t.Line, " at end", message)
+	} else {
+		report(t.Line, " at '"+t.Lexeme+"'", message)
+	}
 
 	return ParseErr{}
 }
 
-type ParseErr struct {} 
+type ParseErr struct{}
 
 func (p ParseErr) Error() string {
 	return ""
-}	
+}

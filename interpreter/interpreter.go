@@ -30,6 +30,24 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 		return !isEqual(left, right), nil
 	}
 
+	switch expr.Operator.TokenType {
+	case token.PLUS:
+		if l, okL := left.(float64); okL {
+			if r, okR := right.(float64); okR {
+				return l + r, nil
+			}
+		}
+		if l, okL := left.(string); okL {
+			if r, okR := right.(string); okR {
+				return l + r, nil
+			}
+		}
+		return nil, errors.RuntimeError{
+			Token:   expr.Operator,
+			Message: "Both operands must be either string or number.",
+		}
+	}
+
 	err = checkBinaryNumberOperand(expr.Operator, left, right)
 	if err != nil {
 		return nil, err
@@ -50,21 +68,6 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.Binary) (any, error) {
 		return left.(float64) * right.(float64), nil
 	case token.SLASH:
 		return left.(float64) / right.(float64), nil
-	case token.PLUS:
-		if l, okL := left.(float64); okL {
-			if r, okR := right.(float64); okR {
-				return l + r, nil
-			}
-		}
-		if l, okL := left.(string); okL {
-			if r, okR := right.(string); okR {
-				return l + r, nil
-			}
-		}
-		return nil, errors.RuntimeError{
-			Token:   expr.Operator,
-			Message: "Both operands must be either string or number.",
-		}
 	}
 
 	panic("unreachable code in VisitBinaryExpr")
