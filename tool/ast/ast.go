@@ -44,7 +44,7 @@ func defineAst(outputDir, baseName string, types []string) {
 	w := bufio.NewWriter(exprGo)
 	fmt.Fprintf(w, "package ast\n\n")
 	fmt.Fprintf(w, "import \"github.com/anwprath/glox/token\"\n\n")
-	fmt.Fprintf(w, "type Expr interface{\nAccept(v Visitor) any\n}\n\n")
+	fmt.Fprintf(w, "type Expr interface{\nAccept(v Visitor) (any, error)\n}\n\n")
 
 	for _, t := range types {
 		structName := strings.TrimSpace(strings.Split(t, ":")[0])
@@ -71,7 +71,7 @@ func defineType(w *bufio.Writer, className, fieldList string) {
 		fmt.Fprintf(w, " %s %s\n", memberName, memberType)
 	}
 	fmt.Fprintf(w, "}\n\n")
-	fmt.Fprintf(w, "func (node *%s)Accept(v Visitor) any {\n return v.Visit%sExpr(node)}\n", className, className)
+	fmt.Fprintf(w, "func (node *%s)Accept(v Visitor) (any, error) {\n return v.Visit%sExpr(node)}\n", className, className)
 
 }
 
@@ -80,7 +80,7 @@ func defineVisitorInterface(w *bufio.Writer, types []string) {
 
 	for _, t := range types {
 		className := strings.TrimSpace(strings.Split(t, ":")[0])
-		fmt.Fprintf(w, "Visit%sExpr(expr *%s) any\n", className, className)
+		fmt.Fprintf(w, "Visit%sExpr(expr *%s) (any, error)\n", className, className)
 	}
 	fmt.Fprintf(w, "}\n\n")
 
