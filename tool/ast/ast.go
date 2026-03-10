@@ -20,7 +20,7 @@ func main() {
 
 	outputDir := args[1]
 
-	defineAst(outputDir, "expr", []string{
+	defineAst(outputDir, "Expr", []string{
 		"Binary   : Expr Left, token.Token Operator, Expr Right",
 		"Grouping : Expr Expression",
 		"Literal  : any Value",
@@ -44,7 +44,7 @@ func defineAst(outputDir, baseName string, types []string) {
 	w := bufio.NewWriter(exprGo)
 	fmt.Fprintf(w, "package ast\n\n")
 	fmt.Fprintf(w, "import \"github.com/anwprath/glox/token\"\n\n")
-	fmt.Fprintf(w, "type Expr interface{\nAccept(v Visitor) (any, error)\n}\n\n")
+	fmt.Fprintf(w, "type %s interface{\nAccept(v Visitor) (any, error)\n}\n\n", baseName)
 
 	for _, t := range types {
 		structName := strings.TrimSpace(strings.Split(t, ":")[0])
