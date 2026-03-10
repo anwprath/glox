@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	defer func() { exec.Command("gofmt", "-w", "ast/expr.go").Run() }()
 	args := os.Args
 	if len(args) != 2 {
 		fmt.Println("Usage: generate_ast <output directory>")
@@ -26,9 +25,15 @@ func main() {
 		"Literal  : any Value",
 		"Unary    : token.Token Operator, Expr Right",
 	})
+
+	defineAst(outputDir, "Stmt", []string{
+		"Expression : Expr expression",
+		"Print      : Expr expression",
+	})
 }
 
 func defineAst(outputDir, baseName string, types []string) {
+	defer func() { exec.Command("gofmt", "-w", "ast/"+baseName+".go").Run() }()
 	outPath := fmt.Sprintf("%s/%s.go", outputDir, baseName)
 
 	// Create directory
@@ -44,15 +49,15 @@ func defineAst(outputDir, baseName string, types []string) {
 	w := bufio.NewWriter(exprGo)
 	fmt.Fprintf(w, "package ast\n\n")
 	fmt.Fprintf(w, "import \"github.com/anwprath/glox/token\"\n\n")
-	fmt.Fprintf(w, "type %s interface{\nAccept(v Visitor) (any, error)\n}\n\n", baseName)
+	fmt.Fprintf(w, "type %s interface{\nAccept(v %sVisitor) (any, error)\n}\n\n", baseName, baseName)
+
+	defineVisitorInterface(w, baseName, types)
 
 	for _, t := range types {
 		structName := strings.TrimSpace(strings.Split(t, ":")[0])
 		fields := strings.TrimSpace(strings.Split(t, ":")[1])
-		defineType(w, structName, fields)
+		defineType(w, baseName, structName, fields)
 	}
-
-	defineVisitorInterface(w, types)
 
 	err = w.Flush()
 	if err != nil {
@@ -61,7 +66,7 @@ func defineAst(outputDir, baseName string, types []string) {
 
 }
 
-func defineType(w *bufio.Writer, className, fieldList string) {
+func defineType(w *bufio.Writer, baseName, className, fieldList string) {
 	fmt.Fprintf(w, "type %s struct {\n", className)
 
 	fields := strings.Split(fieldList, ", ")
@@ -71,16 +76,16 @@ func defineType(w *bufio.Writer, className, fieldList string) {
 		fmt.Fprintf(w, " %s %s\n", memberName, memberType)
 	}
 	fmt.Fprintf(w, "}\n\n")
-	fmt.Fprintf(w, "func (node *%s)Accept(v Visitor) (any, error) {\n return v.Visit%sExpr(node)}\n", className, className)
+	fmt.Fprintf(w, "func (node *%s)Accept(v %sVisitor) (any, error) {\n return v.Visit%sExpr(node)}\n", className, baseName, className)
 
 }
 
-func defineVisitorInterface(w *bufio.Writer, types []string) {
-	fmt.Fprintf(w, "type Visitor interface {\n")
+func defineVisitorInterface(w *bufio.Writer, baseName string, types []string) {
+	fmt.Fprintf(w, "type %sVisitor interface {\n", baseName)
 
 	for _, t := range types {
 		className := strings.TrimSpace(strings.Split(t, ":")[0])
-		fmt.Fprintf(w, "Visit%sExpr(expr *%s) (any, error)\n", className, className)
+		fmt.Fprintf(w, "Visit%s%s(expr *%s) (any, error)\n", className, baseName, className)
 	}
 	fmt.Fprintf(w, "}\n\n")
 

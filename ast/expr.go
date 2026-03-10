@@ -3,7 +3,14 @@ package ast
 import "github.com/anwprath/glox/token"
 
 type Expr interface {
-	Accept(v Visitor) (any, error)
+	Accept(v ExprVisitor) (any, error)
+}
+
+type ExprVisitor interface {
+	VisitBinaryExpr(expr *Binary) (any, error)
+	VisitGroupingExpr(expr *Grouping) (any, error)
+	VisitLiteralExpr(expr *Literal) (any, error)
+	VisitUnaryExpr(expr *Unary) (any, error)
 }
 
 type Binary struct {
@@ -12,7 +19,7 @@ type Binary struct {
 	Right    Expr
 }
 
-func (node *Binary) Accept(v Visitor) (any, error) {
+func (node *Binary) Accept(v ExprVisitor) (any, error) {
 	return v.VisitBinaryExpr(node)
 }
 
@@ -20,7 +27,7 @@ type Grouping struct {
 	Expression Expr
 }
 
-func (node *Grouping) Accept(v Visitor) (any, error) {
+func (node *Grouping) Accept(v ExprVisitor) (any, error) {
 	return v.VisitGroupingExpr(node)
 }
 
@@ -28,7 +35,7 @@ type Literal struct {
 	Value any
 }
 
-func (node *Literal) Accept(v Visitor) (any, error) {
+func (node *Literal) Accept(v ExprVisitor) (any, error) {
 	return v.VisitLiteralExpr(node)
 }
 
@@ -37,13 +44,6 @@ type Unary struct {
 	Right    Expr
 }
 
-func (node *Unary) Accept(v Visitor) (any, error) {
+func (node *Unary) Accept(v ExprVisitor) (any, error) {
 	return v.VisitUnaryExpr(node)
-}
-
-type Visitor interface {
-	VisitBinaryExpr(expr *Binary) (any, error)
-	VisitGroupingExpr(expr *Grouping) (any, error)
-	VisitLiteralExpr(expr *Literal) (any, error)
-	VisitUnaryExpr(expr *Unary) (any, error)
 }

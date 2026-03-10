@@ -8,7 +8,7 @@ import (
 )
 
 // Fails to compile if `AstPrinter` does not implement ast.Visitor
-var _ ast.Visitor = &AstPrinter{}
+var _ ast.ExprVisitor = &AstPrinter{}
 
 type AstPrinter struct{}
 

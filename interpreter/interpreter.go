@@ -11,7 +11,7 @@ import (
 	"github.com/anwprath/glox/token"
 )
 
-var _ ast.Visitor = &Interpreter{}
+var _ ast.ExprVisitor = &Interpreter{}
 
 type Interpreter struct{}
 
