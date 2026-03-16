@@ -12,7 +12,7 @@ type StmtVisitor interface {
 }
 
 type Expression struct {
-	expression Expr
+	Expression Expr
 }
 
 func (node *Expression) Accept(v StmtVisitor) (any, error) {
@@ -20,7 +20,7 @@ func (node *Expression) Accept(v StmtVisitor) (any, error) {
 }
 
 type Print struct {
-	expression Expr
+	Expression Expr
 }
 
 func (node *Print) Accept(v StmtVisitor) (any, error) {

@@ -29,8 +29,31 @@ type Parser struct {
 	current int64
 }
 
-func (p *Parser) Parse() (b ast.Expr, a error) {
-	return p.expression()
+func (p *Parser) Parse() ([]ast.Stmt, error) {
+	stmts := make([]ast.Stmt, 0)
+	for !p.isAtEnd() {
+		stmts = append(stmts, p.statment())
+	}
+	return stmts, nil
+}
+
+func (p *Parser) statment() ast.Stmt {
+	if p.match(token.PRINT) {
+		return p.printStatement()
+	}
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() ast.Stmt {
+	value, _ := p.expression()
+	p.consume(token.SEMICOLON, "expect ';' after expression.")
+	return &ast.Print{Expression: value}
+}
+
+func (p *Parser) expressionStatement() ast.Stmt {
+	value, _ := p.expression()
+	p.consume(token.SEMICOLON, "expect ';' after expression.")
+	return &ast.Expression{Expression: value}
 }
 
 func (p *Parser) expression() (ast.Expr, error) {

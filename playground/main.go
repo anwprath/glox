@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/anwprath/glox/ast/astPrinter"
 	"github.com/anwprath/glox/interpreter"
 	"github.com/anwprath/glox/parser"
 	"github.com/anwprath/glox/scanner"
@@ -32,14 +31,12 @@ func run(command string) {
 	sc := scanner.New(command)
 	tokens := sc.ScanTokens()
 	tokenParser := parser.Parser{Tokens: tokens}
-	exp, err := tokenParser.Parse()
+	stmts, err := tokenParser.Parse()
 	if err != nil {
 		fmt.Println(err)
 		return
 	} else {
-		printer := &astPrinter.AstPrinter{}
-		fmt.Println(printer.Print(exp))
-		Interpreter.Interpret(exp)
+		fmt.Println(stmts)
 	}
 }
 
